@@ -4,12 +4,13 @@
 #include <chrono>
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
+    if (argc < 3) {
         std::cerr << "Uso: " << argv[0] << " <tamanho da matriz N>" << std::endl;
         return 1;
     }
 
     const int N = std::atoi(argv[1]);
+    const int BLOCK_SIZE = std::atoi(argv[2]);
     std::vector<std::vector<int>> matriz1(N, std::vector<int>(N));
     std::vector<std::vector<int>> matriz2(N, std::vector<int>(N));
     std::vector<std::vector<int>> resultado(N, std::vector<int>(N, 0));
@@ -29,10 +30,9 @@ int main(int argc, char *argv[]) {
 
 
     auto inicio = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; i += BLOCK_SIZE) {
         for (int j = 0; j < N; ++j) {
-            resultado[i][j] = 0;
-            for (int k = 0; k < N; ++k) {
+            for (int k = 0; k < std::min(j + BLOCK_SIZE, N); ++k) {
                 resultado[i][j] += matriz1[i][k] * matriz2[k][j];
             }
         }
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     auto fim = std::chrono::high_resolution_clock::now();
     auto duracao = std::chrono::duration_cast<std::chrono::microseconds>(fim - inicio);
 
-    std::cout << "Tempo de execução (sequencial): " << duracao.count() << " microsegundos" << std::endl;
+    std::cout << "Tempo de execução (blocagem): " << duracao.count() << " microsegundos" << std::endl;
 
     return 0;
 }
